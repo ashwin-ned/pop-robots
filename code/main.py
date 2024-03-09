@@ -1,16 +1,18 @@
 import cv2
 import numpy as np
 import openai
-import base64 
+import base64
+import os 
 import random
 
-def process_image(image, randomize=False, save=True):
+def process_image(image, randomize=False, save=True, show=False):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Threshold input greyscale image otsu's method
     ret, thresh_image = cv2.threshold(gray_image, 120, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    cv2.imshow("Threshold", thresh_image)
-    cv2.waitKey(0)
+    if show:
+        cv2.imshow("Threshold", thresh_image)
+        cv2.waitKey(0)
     if randomize:
         color1 = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
         color2 = (0, 0, 0)
@@ -49,11 +51,27 @@ def load_pregenerated_image(image_path, show=True):
         cv2.destroyAllWindows()
     return image
 
+def blend_images(image_list):
+    crop_list = []
+    for image in image_list:
+        cropped = image[0:1024, 250:600]
+        crop_list.append(cropped)
+    result = np.concatenate((crop_list[0], crop_list[1], crop_list[2], crop_list[3]), axis=1)
+   
+    print(result.shape)
+    cv2.imshow("result", result)
+    cv2.waitKey(0)
+    return result
 if __name__ == "__main__":
     # Genereate image from prompt
-    generate_image("robot", "abstract", "red and yellow")
+    #generate_image("robot", "abstract", "red and yellow")
     # Load pregenerated image
-    image_path = r"C:/Users/Ashwin/Desktop/CVPR24Art/media/robot1.png"
-    image = load_pregenerated_image(image_path)
-    # process Image
-    processed = process_image(image)
+    image_folder = r"C:/Users/Ashwin/Desktop/CVPR24Art/pop-robots/media/"
+    processed_images = []
+    for file in os.listdir(image_folder):
+        if file.endswith(".png") or file.endswith(".jpg"):
+            image_path = os.path.join(image_folder, file)
+            image = load_pregenerated_image(image_path, show=False)
+            processed = process_image(image, save=False)
+            processed_images.append(processed)
+    blended_image = blend_images(processed_images)
