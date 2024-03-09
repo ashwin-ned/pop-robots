@@ -1,4 +1,4 @@
-# pop-robots
+# Reimagined Machines
 Submission for the CVPR AI Art Gallery 2024
 
 ![Reimagined Machines](./output/final.jpg)
